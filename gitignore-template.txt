@@ -1,0 +1,10 @@
+# Keep raw skill history and generated research out of GitHub.
+outputs/
+**/state.json
+**/state.json.lock
+**/__pycache__/
+*.pyc
+.env
+.env.*
+.DS_Store
+*.log
