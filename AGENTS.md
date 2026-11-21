@@ -21,10 +21,33 @@ Read `products/main.md` before each search. This is the **single source of truth
 - Show original signal URL, published date (or explicitly unknown), checked date, target role basis, source-backed rationale, verified appropriate public contact route (or none), caution, and manual outreach draft. A numerical score is not a sales probability. Never pad the list to reach a quota.
 - Restrict to intentionally public, professional/business information. No data brokers, scraped contact lists, personal phone/email enrichment, sensitive traits, private groups, or bypassing access controls. No outreach or external actions without separate explicit authorization.
 
+## CREASTO zero-investment qualification
+
+CREASTO has $0 for discovery and applications. Apply the current profile and this check to every search and refresh, including “Find 10 new customers”, chat-only recommendations and manual drafts. Use free research sources only. Open the original public buyer request, confirm it is current, paid work, and verify that a freelancer or agency can use the specified reply or application method for free. Respect the buyer's instructions and platform contact restrictions. An uncertain cost, access rule or hiring status disqualifies the opportunity. Keep exclusions out of all recommendations and drafts. If three pass, return three. An empty shortlist is valid.
+
+For CREASTO add an `eligibility` object to every v2 prospect in the local analysis. Record the following findings from inspected sources:
+
+| Field | Qualification requirement |
+| --- | --- |
+| `buyer_request` | `website-development` for the default profile. Use `ai-ugc` only for an explicit UGC search under `creasto-ai-ugc`. Use the original buyer post as `source_url` and explain the requested deliverable and paid engagement in `evidence`. |
+| `project_status` and `deadline` | Confirm `open` on the checked date. Record a published deadline as YYYY-MM-DD when available. For same-day deadlines check the time and time zone. Explain the current signal in `why_now`. |
+| `compensation` and `applicant_access` | Confirm `paid` project work and `freelancer_or_agency_permitted`. Record who can apply and any platform or community restrictions in the contact route note. |
+| `upfront_requirement` | Record `none` only after checking the entire submission path, including balances, deposits, credits, verification and memberships. |
+| `cost_source_url` and `free_submission_evidence` | Link the original invitation or applicable official fee terms and describe what proves this exact route costs zero. A buyer inviting proposals by public thread reply or published business email can supply direct evidence. A missing price or a “free to join” claim is insufficient. |
+
+Use the v2 verified `contact_route` for the exact application URL, allowed method (`label`), source of that permission, check date and note. For email, use the exact public page that invites proposals as the URL and identify the permitted business mailbox in the local route details. Never substitute an unrelated contact channel for a restricted one.
+
 ## Durable business-only lead register (not a CRM)
 
-- Before each **new** search, run `python3 scripts/lead_register.py list --product '<project_key>'`, and read `data/lead-register.csv`. Exclude listed entity IDs/normalized URLs during discovery. Also run `python3 scripts/lead_register.py seed-state --product '<project_key>' --out 'outputs/<safe-slug>/state.json'` before report generation. The original generator can then run with `--state outputs/<safe-slug>/state.json --new-only` to ensure already-listed entities do not reappear.
-- Reports and the raw `state.json` belong under `outputs/` and **must remain uncommitted**, as required by the original skill. Use a fresh report run folder and the original generator syntax: `python3 .agents/skills/first-customer-finder/scripts/generate_report.py <analysis.json> <report.md> --csv <prospects.csv> --state <state.json> --new-only`.
+- Before each **new** search, run `python3 scripts/lead_register.py list --product '<project_key>'`, and read `data/lead-register.csv`. Exclude listed entity IDs/normalized URLs during discovery. Also run `python3 scripts/lead_register.py seed-state --product '<project_key>' --out 'outputs/<safe-slug>/state.json'` before report generation. The report generator uses `--state outputs/<safe-slug>/state.json --new-only` to ensure already-listed entities do not reappear.
+- Reports and the raw `state.json` belong under `outputs/` and **must remain uncommitted**, as required by the original skill. For CREASTO, run the workspace qualification check first, even for chat-only results. Set `run` to the fresh run folder containing the analysis and seeded state, then run the following from the repository root.
+
+  ```sh
+  python3 scripts/qualify_report.py "$run/analysis.json" "$run/qualified.json" &&
+    python3 .agents/skills/first-customer-finder/scripts/generate_report.py "$run/qualified.json" "$run/report.md" --csv "$run/prospects.csv" --state "$run/state.json" --new-only
+  ```
+
+  The qualifier defaults to the website project. Pass `--product creasto-ai-ugc` for an explicit UGC search. If validation fails, remove unsupported candidates, revise counts, verdict and plan, and rerun. Use the resulting qualified JSON for the register. For a refresh, recheck original sources and omit `--new-only` as directed by the skill. Other products use the original generator with their own analysis and history.
 - After generating a real report, use `python3 scripts/lead_register.py record --product '<project_key>' --report-json <analysis.json> --id <id> [--id <other-id>...]` to add **only verified businesses, business projects, or organizational profiles** from that report. Never copy personal profiles, individual names or private details into GitHub. The record command deliberately requires explicit ID selections. For individual-only prospects, leave history in task-local output and explain they will not persist across tasks.
 - Do **not** assume any prospect is approved, contacted, replied, rejected, or a customer; add only `seen` business records from a report. Save user-stated judgments by `python3 scripts/lead_register.py review --product ... --id ... --decision ...` or `status` as appropriate. Do not infer outreach status from a draft.
 - Prepare a **pull request** for changes to `data/lead-register.csv` and product profile, not a silent merge. Tell the user to **review and merge it** for permanent history. A new task will not see changes that have not been merged. If GitHub commit/push/PR is unavailable, present the edited file and the exact manual save action. Never claim persistence until committed and merged.

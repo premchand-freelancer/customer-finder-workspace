@@ -10,6 +10,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+from qualify_report import SERVICES, qualify_report
+
 BASE = Path(__file__).resolve().parents[1]
 SKILL_SCRIPTS = BASE / '.agents' / 'skills' / 'first-customer-finder' / 'scripts'
 sys.path.insert(0, str(SKILL_SCRIPTS))
@@ -122,7 +124,8 @@ def main():
             return
         if args.command == 'record':
             with args.report_json.open('r', encoding='utf-8') as f:
-                analysis = normalize_report(json.load(f))
+                raw = json.load(f)
+            analysis = qualify_report(raw, args.product) if args.product in SERVICES else normalize_report(raw)
             if analysis.get('demo') or analysis['project_key'] != args.product or analysis['schema_version'] != 2:
                 raise ValueError('Only validated v2 real research for the matching product is allowed')
             candidates = {p['id']: p for p in analysis['prospects']}
