@@ -63,6 +63,36 @@ class TestQualification(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         qualify_report(report, PRODUCT)
 
+    def test_excluded_marketplaces_rejected_even_if_marked_free(self):
+        # Every record below is otherwise "verified", paid, open, and labelled $0.
+        # A self-reported free route must never override the hard marketplace ban.
+        cases = [
+            ('source_url', 'https://www.freelancer.com/projects/web-design/test'),
+            ('entity_url', 'https://freelancer.in/projects/test'),
+            ('contact_route.url', 'https://www.freelancer.com/projects/test/bid'),
+            ('contact_route.source_url', 'https://freelancer.co.uk/projects/test'),
+            ('eligibility.cost_source_url', 'https://www.upwork.com/nx/find-work'),
+            ('source_title', 'Hiring on Freelancer.com, apply here'),
+            ('contact_route.label', 'Send proposal via Freelancer.com'),
+            ('eligibility.free_submission_evidence', 'Freelancer.com is free to bid (unverified)'),
+        ]
+        for path, value in cases:
+            with self.subTest(field=path):
+                report = example()
+                if '.' in path and not path.endswith('source_title'):
+                    owner, field = path.split('.', 1)
+                    report['prospects'][0][owner][field] = value
+                else:
+                    report['prospects'][0][path] = value
+                with self.assertRaisesRegex(ValueError, 'excluded platform'):
+                    qualify_report(report, PRODUCT)
+
+    def test_similar_but_unrelated_domains_are_not_blocked(self):
+        report = example()
+        report['prospects'][0]['source_url'] = 'https://notfreelancer.com/brief'
+        report['prospects'][0]['eligibility']['cost_source_url'] = 'https://upwork.com.example.org/terms'
+        self.assertEqual(len(qualify_report(report, PRODUCT)['prospects']), 1)
+
     def test_unverified_original_request(self):
         report = example()
         report['prospects'][0]['evidence_status'] = 'uncertain'
