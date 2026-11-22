@@ -17,6 +17,10 @@ Search India nationwide, including smaller cities and districts. Prioritize publ
 
 CREASTO has $0 available to find or apply for projects. Use free discovery and proposal routes only. Exclude Freelancer.com projects requiring a minimum wallet balance and Upwork opportunities requiring purchased Connects. Exclude paid bidding, application credits, required subscriptions or memberships, deposits, wallet recharges, paid verification and any other mandatory upfront payment. Never assume credits, wallet funds or premium access are available. Exclude unpaid or speculative work, employee-only roles, expired opportunities and unverified requests. Respect platform rules, group rules and the buyer's allowed contact methods.
 
+## Absolute excluded marketplaces
+
+Do not search, propose, rank, link as actionable results, or export opportunities from Freelancer.com (including its country domains) or Upwork. These platforms remain excluded even if the AI claims a specific bid is free. Seek direct public business invitations and free-to-reply communities instead. The qualified report script enforces the domain exclusion; never bypass it with chat-only lists.
+
 ## Evidence required for each opportunity
 
 - Open the buyer's original public post, project brief or hiring page. Link it, identify the business and the requester's role where evidenced, and summarize what website work the buyer actually requested.
