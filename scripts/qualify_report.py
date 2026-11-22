@@ -4,6 +4,8 @@ import json
 import sys
 from datetime import date
 from pathlib import Path
+from urllib.parse import urlsplit
+import re
 
 SKILL_SCRIPTS = Path(__file__).resolve().parents[1] / '.agents/skills/first-customer-finder/scripts'
 sys.path.insert(0, str(SKILL_SCRIPTS))
@@ -15,8 +17,47 @@ SERVICES = {
 }
 
 
+# These sites are excluded for CREASTO even if a model incorrectly labels
+# their application route as free. Only the repository owner may change this list.
+EXCLUDED_PLATFORMS = (
+    'freelancer.com', 'freelancer.in', 'freelancer.co.uk',
+    'freelancer.com.au', 'upwork.com',
+)
+
+
+def reject_excluded_platform(prospect):
+    """Reject known pay-to-bid marketplaces before evaluating AI-reported cost."""
+    route = prospect.get('contact_route') or {}
+    findings = prospect.get('eligibility') or {}
+    locations = {
+        'entity_url': prospect.get('entity_url'),
+        'source_url': prospect.get('source_url'),
+        'contact_route.url': route.get('url'),
+        'contact_route.source_url': route.get('source_url'),
+        'eligibility.cost_source_url': findings.get('cost_source_url'),
+    }
+    for field, url in locations.items():
+        if not isinstance(url, str):
+            continue
+        hostname = (urlsplit(url).hostname or '').lower().rstrip('.')
+        for blocked in EXCLUDED_PLATFORMS:
+            if hostname == blocked or hostname.endswith('.' + blocked):
+                raise ValueError(f'{field} points to excluded platform {blocked}')
+    # Also catch platform disclosure in source labels even when the URL is shortened.
+    clues = (prospect.get('source_title'), prospect.get('source_type'),
+             prospect.get('suggested_channel'), route.get('label'),
+             route.get('note'), findings.get('free_submission_evidence'))
+    for value in clues:
+        if not isinstance(value, str):
+            continue
+        for blocked in EXCLUDED_PLATFORMS:
+            if re.search(r'(?<![a-z0-9])' + re.escape(blocked) + r'(?![a-z0-9])', value, re.I):
+                raise ValueError(f'Prospect references excluded platform {blocked}')
+
+
 def check_eligibility(prospect, service):
     """Check recorded findings. The researcher must inspect the cited public pages."""
+    reject_excluded_platform(prospect)
     findings = prospect.get('eligibility')
     if not isinstance(findings, dict):
         raise ValueError('Missing eligibility findings')
