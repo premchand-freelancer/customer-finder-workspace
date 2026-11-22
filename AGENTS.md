@@ -37,6 +37,21 @@ For CREASTO add an `eligibility` object to every v2 prospect in the local analys
 
 Use the v2 verified `contact_route` for the exact application URL, allowed method (`label`), source of that permission, check date and note. For email, use the exact public page that invites proposals as the URL and identify the permitted business mailbox in the local route details. Never substitute an unrelated contact channel for a restricted one.
 
+### Hard marketplace exclusion (CREASTO)
+
+Never search for or recommend projects hosted by Freelancer.com, Freelancer.in,
+Freelancer.co.uk, Freelancer.com.au, or Upwork, even when a page or a model claims
+that applying is free. These sources are entirely excluded from CREASTO research,
+chat summaries, outreach drafts, CSV, and Markdown prospect recommendations.
+Do not include links to these platforms as actionable leads. This is an explicit
+user preference, not a case-by-case cost assessment.
+
+The deterministic validator `scripts/qualify_report.py` rejects excluded domains
+in original buyer links, business URLs, contact routes, cost evidence, and source
+labels. Run it **before any CREASTO report export or lead register update**, and
+only summarize the qualified output. If Codex cannot validate its candidates,
+return no qualified prospects instead of presenting unchecked results.
+
 ## Durable business-only lead register (not a CRM)
 
 - Before each **new** search, run `python3 scripts/lead_register.py list --product '<project_key>'`, and read `data/lead-register.csv`. Exclude listed entity IDs/normalized URLs during discovery. Also run `python3 scripts/lead_register.py seed-state --product '<project_key>' --out 'outputs/<safe-slug>/state.json'` before report generation. The report generator uses `--state outputs/<safe-slug>/state.json --new-only` to ensure already-listed entities do not reappear.
